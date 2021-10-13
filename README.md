@@ -1,11 +1,11 @@
 Backlight kind of works. needs to be split out into rgb. macro led sets backlight to full? Aparently not as alike to the G15 as hoped.
 
 make: 
-stephen@ao751h:~/Documents/projects/g13$ sudo insmod ./hid-lg-g15.ko
+<code>stephen@ao751h:~/Documents/projects/g13$ sudo insmod ./hid-lg-g15.ko</code>
 
 dmesg:
 ...
-[141992.481805] usb 2-1: USB disconnect, device number 6
+<pre><code>[141992.481805] usb 2-1: USB disconnect, device number 6
 [141993.497565] usb 2-1: new full-speed USB device number 7 using uhci_hcd
 [141993.688838] usb 2-1: New USB device found, idVendor=046d, idProduct=c21c, bcdDevice= 2.03
 [141993.688879] usb 2-1: New USB device strings: Mfr=0, Product=1, SerialNumber=0
@@ -24,11 +24,11 @@ root@ao751h:/home/stephen/Documents/projects/g13# echo 64 > /sys/class/leds/g15\
 root@ao751h:/home/stephen/Documents/projects/g13# cat /sys/class/leds/g15\:\:macro_record/brightness 
 1
 root@ao751h:/home/stephen/Documents/projects/g13# echo 0 >  /sys/class/leds/g15\:\:macro_record/brightness
-
+</code></pre>
 
 evtest didn't work
 
-root@ao751h:/home/stephen/Documents/projects/g13# ls /sys/devices/pci0000\:00/0000\:00\:1d.0/usb2/2-1/2-1\:1.0/0003\:046D\:C21C.0130/input/input47/
+<pre><code>root@ao751h:/home/stephen/Documents/projects/g13# ls /sys/devices/pci0000\:00/0000\:00\:1d.0/usb2/2-1/2-1\:1.0/0003\:046D\:C21C.0130/input/input47/
 capabilities/ device/       event12/      id/           inhibited     modalias      name          phys          power/        properties    subsystem/    uevent        uniq
 root@ao751h:/home/stephen/Documents/projects/g13# ls /sys/devices/pci0000\:00/0000\:00\:1d.0/usb2/2-1/2-1\:1.0/0003\:046D\:C21C.0130/input/input47/^C
 root@ao751h:/home/stephen/Documents/projects/g13# evtest
@@ -86,3 +86,4 @@ Testing ... (interrupt to exit)
 
 
 ^Croot@ao751h:/home/stephen/Documents/projects/g13#
+</code></pre>
