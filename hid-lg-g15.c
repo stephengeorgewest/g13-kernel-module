@@ -24,6 +24,7 @@
 #define LG_G510_FEATURE_POWER_ON_RGB	0x06
 
 enum lg_g15_model {
+	LG_G13,
 	LG_G15,
 	LG_G15_V2,
 	LG_G510,
@@ -72,7 +73,7 @@ static int lg_g15_update_led_brightness(struct lg_g15_data *g15)
 				 g15->transfer_buf, 4,
 				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
 	if (ret != 4) {
-		hid_err(g15->hdev, "Error getting LED brightness: %d\n", ret);
+		hid_err(g15->hdev, "Error getting update LED brightness: %d\n", ret);
 		return (ret < 0) ? ret : -EIO;
 	}
 
@@ -198,7 +199,7 @@ static int lg_g510_get_initial_led_brightness(struct lg_g15_data *g15, int i)
 				 g15->transfer_buf, 4,
 				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
 	if (ret != 4) {
-		hid_err(g15->hdev, "Error getting LED brightness: %d\n", ret);
+		hid_err(g15->hdev, "Error getting initial LED %d brightness: %d\n", i, ret);
 		return (ret < 0) ? ret : -EIO;
 	}
 
@@ -362,7 +363,7 @@ static int lg_g510_update_mkey_led_brightness(struct lg_g15_data *g15)
 				 g15->transfer_buf, 2,
 				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
 	if (ret != 2) {
-		hid_err(g15->hdev, "Error getting LED brightness: %d\n", ret);
+		hid_err(g15->hdev, "Error getting update mkey LED brightness: %d\n", ret);
 		ret = (ret < 0) ? ret : -EIO;
 	}
 
@@ -447,16 +448,17 @@ static int lg_g15_get_initial_led_brightness(struct lg_g15_data *g15)
 	case LG_G15:
 	case LG_G15_V2:
 		return lg_g15_update_led_brightness(g15);
+	case LG_G13:
 	case LG_G510:
 	case LG_G510_USB_AUDIO:
 		ret = lg_g510_get_initial_led_brightness(g15, 0);
 		if (ret)
 			return ret;
-
+		if(!g15->model == LG_G13){
 		ret = lg_g510_get_initial_led_brightness(g15, 1);
 		if (ret)
 			return ret;
-
+		}
 		return lg_g510_update_mkey_led_brightness(g15);
 	case LG_Z10:
 		/*
@@ -640,6 +642,7 @@ static int lg_g15_raw_event(struct hid_device *hdev, struct hid_report *report,
 			input_sync(g15->input);
 		}
 		break;
+	case LG_G13:
 	case LG_G510:
 	case LG_G510_USB_AUDIO:
 		if (data[0] == 0x03 && size == 5)
@@ -685,6 +688,7 @@ static int lg_g15_register_led(struct lg_g15_data *g15, int i, const char *name)
 			g15->leds[i].cdev.max_brightness = 1;
 		}
 		break;
+	case LG_G13:
 	case LG_G510:
 	case LG_G510_USB_AUDIO:
 		switch (i) {
@@ -811,6 +815,12 @@ static int lg_g15_probe(struct hid_device *hdev, const struct hid_device_id *id)
 		gkeys_settings_output_report = 0x02;
 		gkeys = 6;
 		break;
+	case LG_G13:
+		INIT_WORK(&g15->work, lg_g510_leds_sync_work);
+		connect_mask = HID_CONNECT_HIDINPUT | HID_CONNECT_HIDRAW;
+		gkeys_settings_feature_report = 0x01;
+		gkeys = 22;
+		break;
 	case LG_G510:
 	case LG_G510_USB_AUDIO:
 		INIT_WORK(&g15->work, lg_g510_leds_sync_work);
@@ -922,16 +932,16 @@ static const struct hid_device_id lg_g15_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
 		USB_DEVICE_ID_LOGITECH_G11),
 		.driver_data = LG_G15 },
-	/* The G13 is a G15 without the keyboard, with more gkeys, plus a thumbstick, treat it as a G15 */
-	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
-		USB_DEVICE_ID_LOGITECH_G13),
-		.driver_data = LG_G15 },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
 			 USB_DEVICE_ID_LOGITECH_G15_LCD),
 		.driver_data = LG_G15 },
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
 			 USB_DEVICE_ID_LOGITECH_G15_V2_LCD),
 		.driver_data = LG_G15_V2 },
+	/* The G13 is a G510 without the keyboard, with more gkeys, plus a thumbstick, treat it as a G510 mostly */
+	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
+		USB_DEVICE_ID_LOGITECH_G13),
+		.driver_data = LG_G13 },
 	/* G510 without a headset plugged in */
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LOGITECH,
 			 USB_DEVICE_ID_LOGITECH_G510),

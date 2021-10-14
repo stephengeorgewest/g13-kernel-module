@@ -1,11 +1,14 @@
-Backlight kind of works. needs to be split out into rgb. macro led sets backlight to full? Aparently not as alike to the G15 as hoped.
+Backlight kind of works in g15/g510 format, but they don't do the expected things. Aparently not as alike to the G15 as hoped.
 
-make: 
-<code>stephen@ao751h:~/Documents/projects/g13$ sudo insmod ./hid-lg-g15.ko</code>
-
-dmesg:
-...
-<pre><code>[141992.481805] usb 2-1: USB disconnect, device number 6
+<pre><code>stephen@ao751h:~/Documents/projects/g13$ make
+make -C /lib/modules/5.14.0-2-686-pae/build M=/home/stephen/Documents/projects/g13 modules
+make[1]: Entering directory '/usr/src/linux-headers-5.14.0-2-686-pae'
+make[1]: Leaving directory '/usr/src/linux-headers-5.14.0-2-686-pae'
+stephen@ao751h:~/Documents/projects/g13$ sudo insmod ./hid-lg-g15.ko
+</code></pre>
+check dmesg:
+<pre><code>...
+[141992.481805] usb 2-1: USB disconnect, device number 6
 [141993.497565] usb 2-1: new full-speed USB device number 7 using uhci_hcd
 [141993.688838] usb 2-1: New USB device found, idVendor=046d, idProduct=c21c, bcdDevice= 2.03
 [141993.688879] usb 2-1: New USB device strings: Mfr=0, Product=1, SerialNumber=0
@@ -13,8 +16,9 @@ dmesg:
 [141993.713546] hid-generic 0003:046D:C21C.0130: hiddev2,hidraw4: USB HID v1.11 Device [G13] on usb-0000:00:1d.0-1/input0
 [142482.986330] lg-g15 0003:046D:C21C.0130: hidraw4: USB HID v1.11 Device [G13] on usb-0000:00:1d.0-1/input0
 [142483.055391] input: Logitech Gaming Keyboard Gaming Keys as /devices/pci0000:00/0000:00:1d.0/usb2/2-1/2-1:1.0/0003:046D:C21C.0130/input/input47
-
-root@ao751h:/home/stephen/Documents/projects/g13# echo 0 > /sys/class/leds/g15\:\:lcd_backlight/brightness
+</code></pre>
+Check leds by writing to:
+<pre><code>root@ao751h:/home/stephen/Documents/projects/g13# echo 0 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 128 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 255 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 64 > /sys/class/leds/g15\:\:lcd_backlight/brightness
@@ -26,7 +30,7 @@ root@ao751h:/home/stephen/Documents/projects/g13# cat /sys/class/leds/g15\:\:mac
 root@ao751h:/home/stephen/Documents/projects/g13# echo 0 >  /sys/class/leds/g15\:\:macro_record/brightness
 </code></pre>
 
-evtest didn't work
+Check button presses with evtest (doesn't work yet?)
 
 <pre><code>root@ao751h:/home/stephen/Documents/projects/g13# ls /sys/devices/pci0000\:00/0000\:00\:1d.0/usb2/2-1/2-1\:1.0/0003\:046D\:C21C.0130/input/input47/
 capabilities/ device/       event12/      id/           inhibited     modalias      name          phys          power/        properties    subsystem/    uevent        uniq
