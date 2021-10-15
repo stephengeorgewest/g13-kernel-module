@@ -23,6 +23,9 @@
 #define LG_G510_FEATURE_BACKLIGHT_RGB	0x05
 #define LG_G510_FEATURE_POWER_ON_RGB	0x06
 
+#define LG_G13_FEATURE_M_KEYS_LEDS	0x05
+#define LG_G13_FEATURE_BACKLIGHT_RGB	0x07
+
 enum lg_g15_model {
 	LG_G13,
 	LG_G15,
@@ -195,7 +198,8 @@ static int lg_g510_get_initial_led_brightness(struct lg_g15_data *g15, int i)
 {
 	int ret, high;
 
-	ret = hid_hw_raw_request(g15->hdev, LG_G510_FEATURE_BACKLIGHT_RGB + i,
+	ret = hid_hw_raw_request(g15->hdev,
+				 (g15->model==LG_G13 ? LG_G13_FEATURE_BACKLIGHT_RGB : LG_G510_FEATURE_BACKLIGHT_RGB) + i,
 				 g15->transfer_buf, 4,
 				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
 	if (ret != 4) {
@@ -240,7 +244,7 @@ static int lg_g510_kbd_led_write(struct lg_g15_data *g15,
 		DIV_ROUND_CLOSEST(g15_led->blue * brightness, 255);
 
 	ret = hid_hw_raw_request(g15->hdev,
-				 LG_G510_FEATURE_BACKLIGHT_RGB + g15_led->led,
+				 (g15->model==LG_G13 ? LG_G13_FEATURE_BACKLIGHT_RGB : LG_G510_FEATURE_BACKLIGHT_RGB) + g15_led->led,
 				 g15->transfer_buf, 4,
 				 HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
 	if (ret == 4) {
@@ -359,7 +363,8 @@ static int lg_g510_update_mkey_led_brightness(struct lg_g15_data *g15)
 {
 	int ret;
 
-	ret = hid_hw_raw_request(g15->hdev, LG_G510_FEATURE_M_KEYS_LEDS,
+	ret = hid_hw_raw_request(g15->hdev,
+				 g15->model == LG_G13 ? LG_G13_FEATURE_M_KEYS_LEDS : LG_G510_FEATURE_M_KEYS_LEDS,
 				 g15->transfer_buf, 2,
 				 HID_FEATURE_REPORT, HID_REQ_GET_REPORT);
 	if (ret != 2) {
@@ -368,13 +373,13 @@ static int lg_g510_update_mkey_led_brightness(struct lg_g15_data *g15)
 	}
 
 	g15->leds[LG_G15_MACRO_PRESET1].brightness =
-		!!(g15->transfer_buf[1] & 0x80);
+		!!(g15->transfer_buf[1] & (g15->model == LG_G13 ? 0x01 : 0x80));
 	g15->leds[LG_G15_MACRO_PRESET2].brightness =
-		!!(g15->transfer_buf[1] & 0x40);
+		!!(g15->transfer_buf[1] & (g15->model == LG_G13 ? 0x02 : 0x40));
 	g15->leds[LG_G15_MACRO_PRESET3].brightness =
-		!!(g15->transfer_buf[1] & 0x20);
+		!!(g15->transfer_buf[1] & (g15->model == LG_G13 ? 0x04 : 0x20));
 	g15->leds[LG_G15_MACRO_RECORD].brightness =
-		!!(g15->transfer_buf[1] & 0x10);
+		!!(g15->transfer_buf[1] & (g15->model == LG_G13 ? 0x08 : 0x10));
 
 	return 0;
 }
@@ -415,14 +420,19 @@ static int lg_g510_mkey_led_set(struct led_classdev *led_cdev,
 		else
 			val = g15->leds[i].brightness;
 
-		if (val)
-			mask |= 0x80 >> (i - LG_G15_MACRO_PRESET1);
+		if (val) {
+			if(g15->model == LG_G13)
+				mask |= 1 << (i - LG_G15_MACRO_PRESET1);
+			else
+				mask |= 0x80 >> (i - LG_G15_MACRO_PRESET1);
+		}
 	}
 
-	g15->transfer_buf[0] = LG_G510_FEATURE_M_KEYS_LEDS;
+	g15->transfer_buf[0] = g15->model == LG_G13 ? LG_G13_FEATURE_M_KEYS_LEDS : LG_G510_FEATURE_M_KEYS_LEDS;
 	g15->transfer_buf[1] = mask;
 
-	ret = hid_hw_raw_request(g15->hdev, LG_G510_FEATURE_M_KEYS_LEDS,
+	ret = hid_hw_raw_request(g15->hdev,
+				g15->model == LG_G13 ? LG_G13_FEATURE_M_KEYS_LEDS : LG_G510_FEATURE_M_KEYS_LEDS,
 				 g15->transfer_buf, 2,
 				 HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
 	if (ret == 2) {
@@ -454,10 +464,10 @@ static int lg_g15_get_initial_led_brightness(struct lg_g15_data *g15)
 		ret = lg_g510_get_initial_led_brightness(g15, 0);
 		if (ret)
 			return ret;
-		if(!g15->model == LG_G13){
-		ret = lg_g510_get_initial_led_brightness(g15, 1);
-		if (ret)
-			return ret;
+		if(!g15->model == LG_G13) {
+			ret = lg_g510_get_initial_led_brightness(g15, 1);
+			if (ret)
+				return ret;
 		}
 		return lg_g510_update_mkey_led_brightness(g15);
 	case LG_Z10:
