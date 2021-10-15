@@ -613,6 +613,78 @@ static int lg_g510_event(struct lg_g15_data *g15, u8 *data)
 	return 0;
 }
 
+static int lg_g13_event(struct lg_g15_data *g15, u8 *data)
+{
+	int i, val;
+
+	/*TODO: handle joystick/buttons*/
+	/*
+	click bottom:
+	01 7a 7c 00 00 00 00 84
+	click left:
+	01 7a 7c 01 00 00 00 02
+	click stick:
+	?
+	move stick:
+	?
+	*/
+
+	/* G1 - G18 */
+	/*G1:
+	01 7a 7c 01 00 00 00 00
+	G22:
+	01 7a 7c 00 00 20 00 00
+	*/
+	for (i = 0; i < 22; i++) {
+		val = data[i / 8 + 3] & (1 << (i % 8));
+		input_report_key(g15->input, KEY_MACRO1 + i, val);
+	}
+
+	/*TODO: use data[5] & 0x8 to handle backlight?*/
+
+	/* M1 - M3 */
+	for (i = 0; i < 3; i++) {
+		/*
+		M1
+		01 7a 7c 00 00 00 20 00
+		M2
+		01 7a 7c 00 00 00 40 00
+		M3
+		01 7a 7c 00 00 00 80 00*/
+		val = data[6] & (0x20 << i);
+		input_report_key(g15->input, KEY_MACRO_PRESET1 + i, val);
+	}
+	/* MR */
+	/*
+	MR
+	01 7a 7c 00 00 00 00 81
+	MR (release)
+	01 7a 7c 00 00 00 00 80
+	G1 (after MR):
+	01 7a 7c 01 00 00 00 80
+	*//*
+	So start is 0x81, and stop is 0x01,
+	or toggle is &0x01	*/
+	input_report_key(g15->input, KEY_MACRO_RECORD_START, data[7] & 0x01);
+
+	/* LCD menu keys */
+	/*
+	roundbutton:
+	01 7a 7c 00 00 00 01 00
+	button 1:
+	01 7a 7c 00 00 00 02 00
+	button 1:
+	01 7a 7c 00 00 00 10 00
+	*/
+	for (i = 0; i < 5; i++) {
+		val = data[6] & (0x01 << i);
+		input_report_key(g15->input, KEY_KBD_LCD_MENU1 + i, val);
+	}
+
+	input_sync(g15->input);
+	return 0;
+}
+
 static int lg_g510_leds_event(struct lg_g15_data *g15, u8 *data)
 {
 	bool backlight_disabled;
@@ -653,6 +725,9 @@ static int lg_g15_raw_event(struct hid_device *hdev, struct hid_report *report,
 		}
 		break;
 	case LG_G13:
+		if (data[0] == 0x01 && size == 8)
+			return lg_g13_event(g15, data);
+		break;
 	case LG_G510:
 	case LG_G510_USB_AUDIO:
 		if (data[0] == 0x03 && size == 5)
