@@ -20,6 +20,7 @@ check dmesg:
 Check leds by writing to:
 <pre><code>root@ao751h:/home/stephen/Documents/projects/g13# echo 0 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 128 > /sys/class/leds/g15\:\:lcd_backlight/brightness
+root@ao751h:/home/stephen/Documents/projects/g13# echo "#0000ff" > /sys/class/leds/g15\:\:kbd_backlight/color
 root@ao751h:/home/stephen/Documents/projects/g13# echo 255 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 64 > /sys/class/leds/g15\:\:lcd_backlight/brightness
 root@ao751h:/home/stephen/Documents/projects/g13# echo 0 > /sys/class/leds/g15\:\:lcd_backlight/brightness
@@ -87,7 +88,45 @@ Supported events:
     Event code 700 (?)
 Properties:
 Testing ... (interrupt to exit)
-
-
+Event: time 1634308924.628871, type 1 (EV_KEY), code 656 (?), value 1
+Event: time 1634308924.628871, -------------- SYN_REPORT ------------
+Event: time 1634308924.738877, type 1 (EV_KEY), code 656 (?), value 0
+Event: time 1634308924.738877, -------------- SYN_REPORT ------------
+Event: time 1634308925.894912, type 1 (EV_KEY), code 656 (?), value 1
+Event: time 1634308925.894912, -------------- SYN_REPORT ------------
+Event: time 1634308926.030915, type 1 (EV_KEY), code 656 (?), value 0
+Event: time 1634308926.030915, -------------- SYN_REPORT ------------
+Event: time 1634308926.540922, type 1 (EV_KEY), code 656 (?), value 1
+Event: time 1634308926.540922, -------------- SYN_REPORT ------------
+Event: time 1634308927.098919, type 1 (EV_KEY), code 657 (?), value 1
+Event: time 1634308927.098919, -------------- SYN_REPORT ------------
+Event: time 1634308927.674956, type 1 (EV_KEY), code 656 (?), value 0
+Event: time 1634308927.674956, -------------- SYN_REPORT ------------
+Event: time 1634308928.206964, type 1 (EV_KEY), code 657 (?), value 0
+Event: time 1634308928.206964, -------------- SYN_REPORT ------------
+Event: time 1634308929.591008, type 1 (EV_KEY), code 691 (?), value 1
+Event: time 1634308929.591008, -------------- SYN_REPORT ------------
+Event: time 1634308929.729016, type 1 (EV_KEY), code 691 (?), value 0
+Event: time 1634308929.729016, -------------- SYN_REPORT ------------
+Event: time 1634308929.915016, type 1 (EV_KEY), code 692 (?), value 1
+Event: time 1634308929.915016, -------------- SYN_REPORT ------------
+Event: time 1634308930.059011, type 1 (EV_KEY), code 692 (?), value 0
+Event: time 1634308930.059011, -------------- SYN_REPORT ------------
+Event: time 1634308930.279027, type 1 (EV_KEY), code 693 (?), value 1
+Event: time 1634308930.279027, -------------- SYN_REPORT ------------
+Event: time 1634308930.444437, type 1 (EV_KEY), code 693 (?), value 0
+Event: time 1634308930.444437, -------------- SYN_REPORT ------------
+Event: time 1634308931.379056, type 1 (EV_KEY), code 693 (?), value 1
+Event: time 1634308931.379056, -------------- SYN_REPORT ------------
+Event: time 1634308931.571060, type 1 (EV_KEY), code 693 (?), value 0
+Event: time 1634308931.571060, -------------- SYN_REPORT ------------
+Event: time 1634308931.821073, type 1 (EV_KEY), code 688 (?), value 1
+Event: time 1634308931.821073, -------------- SYN_REPORT ------------
+Event: time 1634308932.009075, type 1 (EV_KEY), code 688 (?), value 0
+Event: time 1634308932.009075, -------------- SYN_REPORT ------------
+Event: time 1634308933.693122, type 1 (EV_KEY), code 696 (?), value 1
+Event: time 1634308933.693122, -------------- SYN_REPORT ------------
+Event: time 1634308933.889132, type 1 (EV_KEY), code 696 (?), value 0
+Event: time 1634308933.889132, -------------- SYN_REPORT ------------
 ^Croot@ao751h:/home/stephen/Documents/projects/g13#
 </code></pre>
