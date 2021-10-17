@@ -617,17 +617,23 @@ static int lg_g13_event(struct lg_g15_data *g15, u8 *data)
 {
 	int i, val;
 
-	/*TODO: handle joystick/buttons*/
+	/*Handle joystick/buttons*/
 	/*
 	click bottom:
-	01 7a 7c 00 00 00 00 84
+	01 7a 7c 00 00 00 00 04
 	click left:
-	01 7a 7c 01 00 00 00 02
+	01 7a 7c 00 00 00 00 02
 	click stick:
-	?
+	01 7a 7c 00 00 00 00 06
 	move stick:
 	?
 	*/
+	input_report_abs(g15->input, ABS_X, data[1]);
+	input_report_abs(g15->input, ABS_Y, data[2]);
+	input_report_key(g15->input, BTN_TRIGGER, data[7] & 0x02);
+	input_report_key(g15->input, BTN_THUMB, data[7] & 0x04);
+	input_report_key(g15->input, BTN_THUMB2, data[7] & 0x08);
+
 
 	/* G1 - G18 */
 	/*G1:
@@ -992,6 +998,20 @@ static int lg_g15_probe(struct hid_device *hdev, const struct hid_device_id *id)
 		input_set_capability(input, EV_KEY, KEY_MUTE);
 		/* Userspace expects F20 for micmute */
 		input_set_capability(input, EV_KEY, KEY_F20);
+	}
+	/*
+	 * The G13 has a thumbstick and 3 buttons.
+	 */
+	if (g15->model == LG_G13) {
+		input_set_capability(input, EV_KEY, ABS_X);
+		input_set_capability(input, EV_KEY, ABS_Y);
+		/* 4 center values */
+		input_set_abs_params(input, ABS_X, 0, 0xff, 0, 4);
+		input_set_abs_params(input, ABS_Y, 0, 0xff, 0, 4);
+
+		input_set_capability(input, EV_KEY, BTN_TRIGGER);
+		input_set_capability(input, EV_KEY, BTN_THUMB);
+		input_set_capability(input, EV_KEY, BTN_THUMB2);
 	}
 
 	ret = input_register_device(input);
